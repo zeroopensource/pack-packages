@@ -1,0 +1,3 @@
+{
+  "extends": "@zero-company/zero-tsconfig/tsup.json"
+}
