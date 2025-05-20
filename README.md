@@ -35,9 +35,9 @@ This is particularly useful when you have a mix of private packages (e.g., from 
 
 1.  **Configure**: Specify which local packages you want to "pack" in your project's `package.json` or a `pack-packages.config.js` file.
 2.  **Pack**: Run the `pack-packages` command. It will:
-    *   Navigate to each specified local package directory.
-    *   Execute `npm pack` (or a custom pack script like `yarn pack` / `pnpm pack`) to create a `.tgz` archive.
-    *   Copy these archives to a designated output directory (default: `./.packed-packages`) in your project root.
+    - Navigate to each specified local package directory.
+    - Execute `npm pack` (or a custom pack script like `yarn pack` / `pnpm pack`) to create a `.tgz` archive.
+    - Copy these archives to a designated output directory (default: `./.packed-packages`) in your project root.
 3.  **Install**: Modify your project's `package.json` to point to these local `.tgz` files using the `file:` protocol.
     ```json
     // package.json
@@ -81,7 +81,10 @@ Add a `packPackages` section to your project's `package.json`:
     "outputDir": "./.packed-dependencies", // Optional: default is './.packed-packages'
     "packages": [
       { "name": "@my-scope/private-ui-kit", "path": "../private-ui-kit" },
-      { "name": "@my-scope/internal-utils", "path": "/path/to/another/local/package/internal-utils" }
+      {
+        "name": "@my-scope/internal-utils",
+        "path": "/path/to/another/local/package/internal-utils"
+      }
       // Add more local packages here
     ]
   }
@@ -96,20 +99,19 @@ Create a `pack-packages.config.js` file in your project root:
 javascript
 // pack-packages.config.js
 module.exports = {
-  outputDir: './.packed-dependencies', // Optional: default is './.packed-packages'
-  packages: [
-    { name: '@my-scope/private-ui-kit', path: '../private-ui-kit' },
-    { name: '@my-scope/internal-utils', path: '../internal-utils', script: 'pnpm pack' }, // Optional: specify pack script
-    // Add more local packages here
-  ],
+outputDir: './.packed-dependencies', // Optional: default is './.packed-packages'
+packages: [
+{ name: '@my-scope/private-ui-kit', path: '../private-ui-kit' },
+{ name: '@my-scope/internal-utils', path: '../internal-utils', script: 'pnpm pack' }, // Optional: specify pack script
+// Add more local packages here
+],
 };
-
 
 **Package Configuration Options:**
 
-   `name` (String, Optional): The expected name of the package (e.g., `@my-scope/private-ui-kit`). If not provided, `pack-packages` will attempt to read it from the target package's `package.json`. Used for logging.
-   `path` (String, Required): Relative path from your project root to the local package directory you want to pack.
-   `script` (String, Optional): Custom pack command to run in the package directory (e.g., `yarn pack`, `pnpm pack`). Defaults to `npm pack`.
+`name` (String, Optional): The expected name of the package (e.g., `@my-scope/private-ui-kit`). If not provided, `pack-packages` will attempt to read it from the target package's `package.json`. Used for logging.
+`path` (String, Required): Relative path from your project root to the local package directory you want to pack.
+`script` (String, Optional): Custom pack command to run in the package directory (e.g., `yarn pack`, `pnpm pack`). Defaults to `npm pack`.
 
 ### 🏃‍♀️ Running `pack-packages`
 
@@ -118,16 +120,15 @@ Once configured, run the pack command from your project root:
 bash
 npx pack-packages
 
-
 Or add it to your `scripts` in `package.json`:
 
 +json
 +// package.json
 +"scripts": {
-+  "preinstall": "npx pack-packages", // Example: run before every install
-+  "pack-local": "npx pack-packages"
-+}
 
+- "preinstall": "npx pack-packages", // Example: run before every install
+- "pack-local": "npx pack-packages"
+  +}
 
 +This will generate `.tgz` files for your specified packages in the `outputDir` (e.g., `./.packed-dependencies` if configured, otherwise `./.packed-packages`). The generated filenames will typically be in the format `package-name-version.tgz` (e.g., `my-scope-private-ui-kit-1.2.3.tgz`).
 
@@ -138,19 +139,19 @@ After running `pack-packages`, update your project's `package.json` to use the `
 json
 // package.json (assuming outputDir was set to './.packed-dependencies')
 "dependencies": {
-  "@my-scope/private-ui-kit": "file:.packed-dependencies/my-scope-private-ui-kit-1.0.0.tgz",
-  "@my-scope/internal-utils": "file:.packed-dependencies/my-scope-internal-utils-0.5.0.tgz",
-  "@my-scope/public-package": "^1.2.3" // This will be fetched from the configured registry
+"@my-scope/private-ui-kit": "file:.packed-dependencies/my-scope-private-ui-kit-1.0.0.tgz",
+"@my-scope/internal-utils": "file:.packed-dependencies/my-scope-internal-utils-0.5.0.tgz",
+"@my-scope/public-package": "^1.2.3" // This will be fetched from the configured registry
 +}
-+
-Note: The version in the `.tgz` filename (e.g., `1.0.0`) is derived from the `version` field in the `package.json` of the package being packed.*
 
+- Note: The version in the `.tgz` filename (e.g., `1.0.0`) is derived from the `version` field in the `package.json` of the package being packed.\*
 
 ## 🤔 Why `pack-packages`?
 
 NPM's architecture ties a scope (e.g., `@mycompany`) to a single registry defined in your `.npmrc`. If you need to consume packages under the same scope from both a private registry (like GitHub Packages, Verdaccio, or Artifactory) and the public npm registry, you'll face a conflict. `npm` will attempt to fetch all packages under that scope from the single configured registry.
 
 `pack-packages` circumvents this by:
+
 1.  Taking your "private" or "alternative-source" packages (which are available locally).
 2.  Running `npm pack` (or equivalent) on them to create standard `.tgz` package archives.
 3.  Allowing you to reference these `.tgz` files directly in your `package.json` using the `file:` protocol.
@@ -158,11 +159,14 @@ NPM's architecture ties a scope (e.g., `@mycompany`) to a single registry define
 This way, `npm`/`yarn`/`pnpm` resolve these specific dependencies locally from the packed files, while other dependencies (even those under the same scope but not packed locally) are fetched from the primary registry configured for that scope (or the default public registry).
 
 It's a practical solution for:
-   Integrating private and public packages under a unified scope without complex `.npmrc` gymnastics for each developer or CI environment.
-   Testing local monorepo packages in a dependent project as if they were installed from a registry, ensuring a more realistic integration test.
-   Working in environments where modifying global or per-user `.npmrc` files to switch registries for a scope is cumbersome or not feasible.
+Integrating private and public packages under a unified scope without complex `.npmrc` gymnastics for each developer or CI environment.
+Testing local monorepo packages in a dependent project as if they were installed from a registry, ensuring a more realistic integration test.
+Working in environments where modifying global or per-user `.npmrc` files to switch registries for a scope is cumbersome or not feasible.
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request if you have ideas for improvements or find any bugs.
 
+## Metadata
+
+INTERNAL_UUID: aa0d639c-b447-40be-aa30-c3b23cb48b20

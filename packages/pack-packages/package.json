@@ -9,12 +9,11 @@
     "pack-packages": "./bin/cli-proxy.cjs"
   },
   "scripts": {
+    "prepack": "cpx ../../README.md ./",
     "lint": "cross-env TIMING=1 eslint \"**/*.ts*\"",
-    "build": "zero-bundler build --entry ./src"
+    "build": "tsup"
   },
   "dependencies": {
-    "@zero-company/zero-bundler": "^1.0.1",
-    "@zero-company/zero-tsconfig": "^1.0.1",
     "fs-extra": "^11.1.1",
     "@types/fs-extra": "^11.0.1",
     "commander": "^10.0.0",
