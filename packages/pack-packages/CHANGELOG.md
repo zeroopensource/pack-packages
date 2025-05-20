@@ -1,5 +1,11 @@
 # @zero-company/pack-packages
 
+## 0.0.2
+
+### Patch Changes
+
+- [#3](https://github.com/zeroopensource/pack-packages/pull/3) [`b624af5`](https://github.com/zeroopensource/pack-packages/commit/b624af5544e88345fc2ebf3cc08e85abe843123c) Thanks [@jigz](https://github.com/jigz)! - chore: update dependencies and improve release workflow
+
 ## 1.0.2
 
 ### Patch Changes
